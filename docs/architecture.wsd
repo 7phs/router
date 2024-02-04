@@ -22,17 +22,17 @@ System(client, "A client of service", "Services, web- or mobile- applications", 
 System_Boundary(api, "Routing Service") {
     Component(rest_api, "REST API server")
     Component(bridge, "A bridge to routing services")
-    ComponentDb(mem_cache, "An in-memory cache")
+    ComponentDb(mem_cache, "An in-memory cache", "Stores cached data with TTL and limit on number of items")
     Component(cache, "A cache of data from routing data")
     Component(decorator, "A decorator of external routing services")
         
     Rel_Neighbor(cache, mem_cache, "Fetch/store", "sync")
     Rel(rest_api, bridge, "Fetch routing data", "sync")
     Rel(bridge, cache, "Fetch/store cached data", "sync")
-    Rel(bridge, decorator, "Fetch rouging data", "async")
+    Rel(bridge, decorator, "Fetch routing data", "async")
 }
 
-ContainerDb(cach_db, "Cache Database", "NoSQL", "Stores  with TTL routing data already fetched", "proposed", $sprite="postgresql,color=gray")
+ContainerDb(cach_db, "Cache Database", "NoSQL", "Stores cached data with TTL", "proposed", $sprite="postgresql,color=gray")
 
 System_Ext(osrm, "Routing Machine service")
 
