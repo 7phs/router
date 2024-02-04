@@ -16,3 +16,51 @@ A service is responsible for collecting information from 3rd party map-services 
 # Architecture
 
 ![Architecture of the service](./docs/architecture.wsd.svg)
+
+## REST API server
+
+**Functional Requirements:**
+
+1. Fetch data from bridge of routing services;
+2. Represents data in JSON response.
+
+**Non-functional Requirements:**
+
+1. Responses as much data as fetched to response even some of the routes processed with errors. 
+
+## Bridge of routing services
+
+**Functional Requirements:**
+
+1. Requests an external services if no data in cache
+2. Stores fetched data of routing in cache
+
+**Non-functional Requirements:**
+
+1. There are no requirements to limit the number of requests to external services. It is okay to do several requests simultaneously and then store or replace them in the cache.
+
+## Cache of routing data
+
+In-memory cache used in the current implementation to reduce the number of services included in deployments. The second reason is that the number of possible routes is limited for a certain city or area of the city. A solution can be scaled horizontally to reduce the latency of response.
+
+**Functional Requirements:**
+
+1. Stores routing data with a key as a pair of latitude and longitude;
+2. Expires cache data based on configurable TTL.
+
+**Non-functional Requirements:**
+
+1. Needs to make it simple to replace the current in-memory cache with distributed cache based on a NoSQL DB (such as Redis);
+2. In-memory cache should be cleaned based on two rules - TTL and number of stored data as a preventive measure of OOM.
+
+## Decorator of external routing services
+
+**Functional Requirements:**
+
+1. Requests routing data from external services;
+2. Transforms a response of external service into internal representation.
+
+**Non-functional Requirements:**
+
+1. Needs to make it simple to replace http://project-osrm.org with another solution;
+2. Applies throttling and other limitations aligning with the limits of external services.
