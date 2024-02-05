@@ -78,7 +78,8 @@ A service supports the following parameters of configuration with environment va
 * `ROUTER_HTTP_PORT` - a port that a service listens to handle HTTP requests. Default: `8080`;
 * `ROUTER_HTTP_TIMEOUT` - a timeout of handling HTTP requests. Default: `30s` (30 seconds);
 * `ROUTER_OSRM_HOST` - a host of OSRM server. Default: `https://router.project-osrm.org`;
-* `ROUTER_OSRM_REQUEST_TIMEOUT` - a client timeout to request OSRM server. Default: `20s` (20 seconds).
+* `ROUTER_OSRM_REQUEST_TIMEOUT` - a client timeout to request OSRM server. Default: `20s` (20 seconds);
+* `ROUTER_OSRM_REQUEST_LIMIT` - a limit of requests per second to a OSRM server. Default: `50`. 
 
 ## Building/running
 
