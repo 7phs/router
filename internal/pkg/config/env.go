@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DefaultHttpPort       = 80
+	DefaultHttpPort       = 8080
 	DefaultHttpTimeout    = 30 * time.Second
 	DefaultOSMRLimit      = 50
 	DefaultOSMRHost       = "https://router.project-osrm.org"
