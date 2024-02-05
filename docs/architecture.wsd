@@ -29,7 +29,7 @@ System_Boundary(api, "Routing Service") {
     Rel_Neighbor(cache, mem_cache, "Fetch/store", "sync")
     Rel(rest_api, bridge, "Fetch routing data", "sync")
     Rel(bridge, cache, "Fetch/store cached data", "sync")
-    Rel(bridge, decorator, "Fetch routing data", "async")
+    Rel(bridge, decorator, "Fetch routing data", "sync")
 }
 
 ContainerDb(cach_db, "Cache Database", "NoSQL", "Stores cached data with TTL", "proposed", $sprite="postgresql,color=gray")
