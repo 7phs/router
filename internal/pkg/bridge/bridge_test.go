@@ -36,6 +36,8 @@ func (m *mockExternal) GetDestinationMeasures(_ context.Context, _ pkg.Point, _ 
 }
 
 func TestBridge_GetDestinationMeasuresNoCache(t *testing.T) {
+	t.Parallel()
+
 	src := testutil.MustParsePoint(t, "13.38886,52.517037")
 	dst := testutil.MustParsePoints(t, "13.397634,52.529407", "13.428555,52.523219")
 	expectedDestinationList := testutil.GenerateDestinationMeasureList(dst)
@@ -55,6 +57,8 @@ func TestBridge_GetDestinationMeasuresNoCache(t *testing.T) {
 }
 
 func TestBridge_GetDestinationMeasuresOnlyCache(t *testing.T) {
+	t.Parallel()
+
 	src := testutil.MustParsePoint(t, "13.38886,52.517037")
 	dst := testutil.MustParsePoints(t, "13.397634,52.529407", "13.428555,52.523219")
 	expectedDestinationList := testutil.GenerateDestinationMeasureList(dst)
@@ -75,6 +79,8 @@ func TestBridge_GetDestinationMeasuresOnlyCache(t *testing.T) {
 }
 
 func TestBridge_GetDestinationIncludesEquals(t *testing.T) {
+	t.Parallel()
+
 	src := testutil.MustParsePoint(t, "13.38886,52.517037")
 	dst := testutil.MustParsePoints(t, "13.38886,52.517037", "13.397634,52.529407", "13.428555,52.523219")
 	lst := testutil.GenerateDestinationMeasureList(dst)

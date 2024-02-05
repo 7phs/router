@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"log"
 	"sync"
 	"time"
 
@@ -24,7 +25,9 @@ type InMemoryCache struct {
 }
 
 func NewInMemory() *InMemoryCache {
-	return &InMemoryCache{}
+	return &InMemoryCache{
+		cacheData: make(map[string]*InMemoryCacheValue),
+	}
 }
 
 func (c *InMemoryCache) GetDestinationMeasures(_ context.Context, src pkg.Point, dst []pkg.Point) (pkg.DestinationMeasureList, error) {
@@ -59,6 +62,7 @@ func (c *InMemoryCache) StoreDestinationMeasures(_ context.Context, src pkg.Poin
 		return nil
 	}
 
+	log.Println("cache: stores", src, " + number of destination measures:", len(destinationMeasure))
 	now := time.Now()
 
 	c.lock.Lock()

@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	DefaultHttpPort    = 80
-	DefaultHttpTimeout = 10 * time.Second
-	DefaultOSMRLimit   = 50
-	DefaultOSMRHost    = "https://router.project-osrm.org"
+	DefaultHttpPort       = 80
+	DefaultHttpTimeout    = 30 * time.Second
+	DefaultOSMRLimit      = 50
+	DefaultOSMRHost       = "https://router.project-osrm.org"
+	DefaultRequestTimeout = 20 * time.Second
 )
 
 func LoadFromEnv() (Config, error) {
@@ -63,12 +64,17 @@ func LoadHttpFromEnv() (HttpConfig, error) {
 func LoadOSRMFromEnv() (OSRMConfig, error) {
 	var resultErr error
 
+	osrmHost, err := getString("ROUTER_OSRM_HOST", DefaultOSMRHost)
+	if err != nil {
+		resultErr = errors.Join(resultErr, err)
+	}
+
 	osrmLimit, err := getInt("ROUTER_OSRM_REQUEST_LIMIT", DefaultOSMRLimit)
 	if err != nil {
 		resultErr = errors.Join(resultErr, err)
 	}
 
-	osrmHost, err := getString("ROUTER_OSRM_REQUEST_LIMIT", DefaultOSMRHost)
+	osrmRequestTimeout, err := getDuration("ROUTER_OSRM_REQUEST_TIMEOUT", DefaultRequestTimeout)
 	if err != nil {
 		resultErr = errors.Join(resultErr, err)
 	}
@@ -80,6 +86,7 @@ func LoadOSRMFromEnv() (OSRMConfig, error) {
 	return OSRMConfig{
 		Host:                 osrmHost,
 		LimitRequestsPerTime: osrmLimit,
+		RequestTimeout:       osrmRequestTimeout,
 	}, nil
 }
 

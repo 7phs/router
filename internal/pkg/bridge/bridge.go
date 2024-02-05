@@ -45,11 +45,12 @@ func (b *Bridge) GetDestinationMeasures(ctx context.Context, src pkg.Point, dst 
 
 	cachedMeasures, err := b.cache.GetDestinationMeasures(ctx, src, dst)
 	if err != nil {
-		// TODO: needs to check if it is an optimal way to return in this point, or it makes sense to fetch data from external source
-		return measures, err
+		log.Println("failed to fetch measures from cache:", err)
 	}
 
-	measures.UpdateMeasures(cachedMeasures)
+	if len(cachedMeasures) > 0 {
+		measures.UpdateMeasures(cachedMeasures)
+	}
 
 	dst = measures.NotProcessedPoints()
 	if len(dst) == 0 {
@@ -58,12 +59,14 @@ func (b *Bridge) GetDestinationMeasures(ctx context.Context, src pkg.Point, dst 
 
 	newMeasures, err := b.externalRoutingData.GetDestinationMeasures(ctx, src, dst)
 	if err != nil {
-		return measures, err
+		log.Println("failed to fetch measures from external sources:", err)
 	}
 
-	err = b.cache.StoreDestinationMeasures(ctx, src, newMeasures)
-	if err != nil {
-		log.Println("failed to store new measures into cache:", err)
+	if len(newMeasures) > 0 {
+		err = b.cache.StoreDestinationMeasures(ctx, src, newMeasures)
+		if err != nil {
+			log.Println("failed to store new measures into cache:", err)
+		}
 	}
 
 	measures.UpdateMeasures(newMeasures)

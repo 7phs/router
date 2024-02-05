@@ -28,6 +28,10 @@ type Point struct {
 	Index   int
 }
 
+func (p Point) String() string {
+	return p.Encoded
+}
+
 func ParsePoint(encoded string, factor Factor) (Point, error) {
 	encoded = strings.TrimSpace(encoded)
 	if encoded == "" {
@@ -44,11 +48,11 @@ func ParsePoint(encoded string, factor Factor) (Point, error) {
 	for i := 0; i < 2; i++ {
 		numParts := strings.SplitN(parts[i], ".", 2)
 		if len(numParts) < 2 {
-			return Point{}, fmt.Errorf("failed to parse a coordinare '%s': invalid coord", encoded)
+			return Point{}, fmt.Errorf("failed to parse a coordinare '%s': invalid", encoded)
 		}
 		i1, err := strconv.ParseInt(numParts[0], 10, 32)
 		if err != nil {
-			return Point{}, fmt.Errorf("failed to parse a coordinare '%s': invalid coord", encoded)
+			return Point{}, fmt.Errorf("failed to parse a coordinare '%s': invalid", encoded)
 		}
 
 		if len(numParts[1]) > factor.factor {
@@ -59,7 +63,7 @@ func ParsePoint(encoded string, factor Factor) (Point, error) {
 		}
 		i2, err := strconv.ParseInt(numParts[1], 10, 32)
 		if err != nil {
-			return Point{}, fmt.Errorf("failed to parse a coordinare '%s': invalid coord", encoded)
+			return Point{}, fmt.Errorf("failed to parse a coordinare '%s': invalid", encoded)
 		}
 
 		component[i] = float64(i1*factor.multiplication+i2) / float64(factor.multiplication)

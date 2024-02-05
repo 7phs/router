@@ -46,6 +46,10 @@ func NewRestAPIServer(cfg config.HttpConfig, routingData RoutingData) *RestAPISe
 	return api
 }
 
+func (api *RestAPIServer) Handler() http.Handler {
+	return api.httpServer.Handler
+}
+
 func (api *RestAPIServer) Start() error {
 	return api.httpServer.ListenAndServe()
 }
@@ -71,20 +75,20 @@ func parseQueryParams(query url.Values) (pkg.Point, []pkg.Point, error) {
 	case !ok:
 		resultErr = errors.Join(resultErr, fmt.Errorf("src: not presented"))
 	case len(values) != 1:
-		resultErr = errors.Join(resultErr, fmt.Errorf("src: unexpected numbers of values - %values", len(values)))
+		resultErr = errors.Join(resultErr, fmt.Errorf("src: unexpected numbers of values - %v", len(values)))
 	default:
 		if src, err = pkg.ParsePoint(values[0], pkg.DefaultFactor); err != nil {
-			resultErr = errors.Join(resultErr, fmt.Errorf("src: failed to parse a coordinate - %values", err))
+			resultErr = errors.Join(resultErr, err)
 		}
 	}
 
-	values, ok = query["dsr"]
+	values, ok = query["dst"]
 	if !ok {
 		resultErr = errors.Join(resultErr, fmt.Errorf("dst: not presented"))
 	} else {
 		for _, value := range values {
 			if dstValue, err := pkg.ParsePoint(value, pkg.DefaultFactor); err != nil {
-				resultErr = errors.Join(resultErr, fmt.Errorf("src: failed to parse a coordinate - %values", err))
+				resultErr = errors.Join(resultErr, err)
 			} else {
 				dst = append(dst, dstValue)
 			}
@@ -116,11 +120,17 @@ func RoutesResponseFromDestinationMeasure(src pkg.Point, measures []pkg.Destinat
 	routes := make([]Route, 0, len(measures))
 
 	for _, measure := range measures {
+		var errMsg string
+
+		if measure.Err != nil {
+			errMsg = measure.Err.Error()
+		}
+
 		routes = append(routes, Route{
 			Destination: measure.Destination.Encoded,
 			Duration:    measure.Duration,
 			Distance:    measure.Distance,
-			Err:         measure.Err.Error(),
+			Err:         errMsg,
 		})
 	}
 
@@ -146,7 +156,7 @@ func (api *RestAPIServer) Routes(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sort.SliceStable(destinationMeasures, func(i, j int) bool {
-		if destinationMeasures[i].Duration < destinationMeasures[j].Distance {
+		if destinationMeasures[i].Duration < destinationMeasures[j].Duration {
 			return true
 		}
 

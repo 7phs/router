@@ -3,6 +3,7 @@ package external_routing_data
 import (
 	"context"
 	"fmt"
+	"log"
 
 	osrm "github.com/gojuno/go.osrm"
 	geo "github.com/paulmach/go.geo"
@@ -26,7 +27,7 @@ type OSMR struct {
 func NewOSMR(cfg config.OSRMConfig) *OSMR {
 	return &OSMR{
 		rateLimit:  rate.NewLimiter(rate.Limit(cfg.LimitRequestsPerTime), cfg.LimitRequestsPerTime),
-		osrmClient: osrm.NewFromURL(cfg.Host),
+		osrmClient: osrm.NewFromURLWithTimeout(cfg.Host, cfg.RequestTimeout),
 	}
 }
 
@@ -35,6 +36,8 @@ func (o *OSMR) GetDestinationMeasures(ctx context.Context, src pkg.Point, dst []
 		result          = pkg.NewDestinationMeasureList(dst)
 		group, groupCtx = errgroup.WithContext(ctx)
 	)
+
+	log.Println("external: requests osrm service for", src, dst)
 
 	for i, dstPoint := range dst {
 		index := i

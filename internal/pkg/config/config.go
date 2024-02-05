@@ -17,6 +17,7 @@ func (h HttpConfig) Address() string {
 type OSRMConfig struct {
 	Host                 string
 	LimitRequestsPerTime int
+	RequestTimeout       time.Duration
 }
 
 type Config struct {
