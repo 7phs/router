@@ -64,3 +64,39 @@ In-memory cache used in the current implementation to reduce the number of servi
 
 1. Needs to make it simple to replace http://project-osrm.org with another solution;
 2. Applies throttling and other limitations aligning with the limits of external services.
+
+# Building/running/deploying
+
+## Requirements
+
+- Go 1.21+
+
+## Configuration
+
+A service supports the following parameters of configuration with environment variables:
+
+* `ROUTER_HTTP_PORT` - a port that a service listens to handle HTTP requests. Default: `8080`;
+* `ROUTER_HTTP_TIMEOUT` - a timeout of handling HTTP requests. Default: `30s` (30 seconds);
+* `ROUTER_OSRM_HOST` - a host of OSRM server. Default: `https://router.project-osrm.org`;
+* `ROUTER_OSRM_REQUEST_TIMEOUT` - a client timeout to request OSRM server. Default: `20s` (20 seconds).
+
+## Building/running
+
+There it no requirement for external tools needs to be installed.
+
+Uses the following command to run a service locally:
+
+```bash
+go run ./cmd/router/
+```
+
+## Running/deploying
+
+Uses Docker image to run or to deploy this service.
+
+You can use the following command to build and run this service with Docker:
+
+```bash
+docker build . -t demo-router:latest
+docker run -p 8080:8080 demo-router:latest
+ ```
