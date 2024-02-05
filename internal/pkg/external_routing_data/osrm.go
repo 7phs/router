@@ -23,16 +23,16 @@ type OSMR struct {
 	osrmClient *osrm.OSRM
 }
 
-func NewOSMR(cfg config.OSRM) *OSMR {
+func NewOSMR(cfg config.OSRMConfig) *OSMR {
 	return &OSMR{
 		rateLimit:  rate.NewLimiter(rate.Limit(cfg.LimitRequestsPerTime), cfg.LimitRequestsPerTime),
 		osrmClient: osrm.NewFromURL(cfg.Host),
 	}
 }
 
-func (o *OSMR) GetDestinationMeasure(ctx context.Context, src pkg.Point, dst []pkg.Point) ([]pkg.DestinationMeasure, error) {
+func (o *OSMR) GetDestinationMeasures(ctx context.Context, src pkg.Point, dst []pkg.Point) (pkg.DestinationMeasureList, error) {
 	var (
-		result          = pkg.NewDestinationMeasureList(len(dst))
+		result          = pkg.NewDestinationMeasureList(dst)
 		group, groupCtx = errgroup.WithContext(ctx)
 	)
 

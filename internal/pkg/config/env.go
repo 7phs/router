@@ -17,6 +17,29 @@ const (
 func LoadFromEnv() (Config, error) {
 	var resultErr error
 
+	httpConfig, err := LoadHttpFromEnv()
+	if err != nil {
+		resultErr = errors.Join(resultErr, err)
+	}
+
+	osrmConfig, err := LoadOSRMFromEnv()
+	if err != nil {
+		resultErr = errors.Join(resultErr, err)
+	}
+
+	if resultErr != nil {
+		return Config{}, resultErr
+	}
+
+	return Config{
+		HttpConfig: httpConfig,
+		OSRMConfig: osrmConfig,
+	}, nil
+}
+
+func LoadHttpFromEnv() (HttpConfig, error) {
+	var resultErr error
+
 	httpPort, err := getInt("ROUTER_HTTP_PORT", DefaultHttpPort)
 	if err != nil {
 		resultErr = errors.Join(resultErr, err)
@@ -26,6 +49,19 @@ func LoadFromEnv() (Config, error) {
 	if err != nil {
 		resultErr = errors.Join(resultErr, err)
 	}
+
+	if resultErr != nil {
+		return HttpConfig{}, resultErr
+	}
+
+	return HttpConfig{
+		Port:    httpPort,
+		Timeout: httpTimeout,
+	}, nil
+}
+
+func LoadOSRMFromEnv() (OSRMConfig, error) {
+	var resultErr error
 
 	osrmLimit, err := getInt("ROUTER_OSRM_REQUEST_LIMIT", DefaultOSMRLimit)
 	if err != nil {
@@ -38,18 +74,12 @@ func LoadFromEnv() (Config, error) {
 	}
 
 	if resultErr != nil {
-		return Config{}, resultErr
+		return OSRMConfig{}, resultErr
 	}
 
-	return Config{
-		HttpConfig: HttpConfig{
-			Port:    httpPort,
-			Timeout: httpTimeout,
-		},
-		OSRM: OSRM{
-			Host:                 osrmHost,
-			LimitRequestsPerTime: osrmLimit,
-		},
+	return OSRMConfig{
+		Host:                 osrmHost,
+		LimitRequestsPerTime: osrmLimit,
 	}, nil
 }
 

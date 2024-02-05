@@ -14,12 +14,12 @@ func (h HttpConfig) Address() string {
 	return fmt.Sprintf(":%d", h.Port)
 }
 
-type OSRM struct {
+type OSRMConfig struct {
 	Host                 string
 	LimitRequestsPerTime int
 }
 
 type Config struct {
 	HttpConfig
-	OSRM
+	OSRMConfig
 }

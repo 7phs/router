@@ -1,0 +1,47 @@
+run:
+  tests: true
+  modules-download-mode: readonly
+  allow-parallel-runners: true
+
+linters-settings:
+  tagliatelle:
+    case:
+      rules:
+        json: snake
+        mapstructure: kebab
+
+linters:
+  enable:
+    - bodyclose
+    - containedctx
+    - contextcheck
+    - decorder
+    - errchkjson
+    - errname
+    - errorlint
+    - errcheck
+    - exhaustive
+    - gci
+    - gocritic
+    - gocyclo
+    - gofmt
+    - gosec
+    - govet
+    - grouper
+    - ineffassign
+    - interfacebloat
+    - nilerr
+    - noctx
+    - nonamedreturns
+    - makezero
+    - prealloc
+    - predeclared
+    - promlinter
+    - revive
+    - staticcheck
+    - stylecheck
+    - unused
+    - unparam
+    - unconvert
+    - unparam
+    - whitespace

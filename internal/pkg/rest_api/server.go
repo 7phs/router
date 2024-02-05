@@ -18,7 +18,7 @@ import (
 const MaxHeaderBytes = 1 << 20
 
 type RoutingData interface {
-	GetDestinationMeasures(ctx context.Context, src pkg.Point, dst []pkg.Point) ([]pkg.DestinationMeasure, error)
+	GetDestinationMeasures(ctx context.Context, src pkg.Point, dst []pkg.Point) (pkg.DestinationMeasureList, error)
 }
 
 type RestAPIServer struct {
@@ -73,7 +73,7 @@ func parseQueryParams(query url.Values) (pkg.Point, []pkg.Point, error) {
 	case len(values) != 1:
 		resultErr = errors.Join(resultErr, fmt.Errorf("src: unexpected numbers of values - %values", len(values)))
 	default:
-		if src, err = pkg.ParsePoint(values[0]); err != nil {
+		if src, err = pkg.ParsePoint(values[0], pkg.DefaultFactor); err != nil {
 			resultErr = errors.Join(resultErr, fmt.Errorf("src: failed to parse a coordinate - %values", err))
 		}
 	}
@@ -83,7 +83,7 @@ func parseQueryParams(query url.Values) (pkg.Point, []pkg.Point, error) {
 		resultErr = errors.Join(resultErr, fmt.Errorf("dst: not presented"))
 	} else {
 		for _, value := range values {
-			if dstValue, err := pkg.ParsePoint(value); err != nil {
+			if dstValue, err := pkg.ParsePoint(value, pkg.DefaultFactor); err != nil {
 				resultErr = errors.Join(resultErr, fmt.Errorf("src: failed to parse a coordinate - %values", err))
 			} else {
 				dst = append(dst, dstValue)

@@ -2,7 +2,7 @@ package bridge
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/7phs/router/internal/pkg"
 	"github.com/7phs/router/internal/pkg/rest_api"
@@ -13,12 +13,12 @@ var (
 )
 
 type Cache interface {
-	GetDestinationMeasures(ctx context.Context, src pkg.Point, dst []pkg.Point) ([]pkg.DestinationMeasure, error)
-	StoreDestinationMeasures(ctx context.Context, src pkg.Point, destinationMeasure []pkg.DestinationMeasure) error
+	GetDestinationMeasures(ctx context.Context, src pkg.Point, dst []pkg.Point) (pkg.DestinationMeasureList, error)
+	StoreDestinationMeasures(ctx context.Context, src pkg.Point, destinationMeasure pkg.DestinationMeasureList) error
 }
 
 type ExternalRoutingData interface {
-	GetDestinationMeasure(ctx context.Context, src pkg.Point, dst []pkg.Point) ([]pkg.DestinationMeasure, error)
+	GetDestinationMeasures(ctx context.Context, src pkg.Point, dst []pkg.Point) (pkg.DestinationMeasureList, error)
 }
 
 type Bridge struct {
@@ -33,60 +33,40 @@ func NewBridge(cache Cache, externalRoutingData ExternalRoutingData) *Bridge {
 	}
 }
 
-func (b *Bridge) GetDestinationMeasures(ctx context.Context, src pkg.Point, dst []pkg.Point) ([]pkg.DestinationMeasure, error) {
-	measures, notCachedDst, err := b.fetchDataFromCache(ctx, src, dst)
-	if err != nil {
-		return nil, err
-	}
+func (b *Bridge) GetDestinationMeasures(ctx context.Context, src pkg.Point, dst []pkg.Point) (pkg.DestinationMeasureList, error) {
+	measures := pkg.NewDestinationMeasureList(dst)
 
-	if len(notCachedDst) == 0 {
+	measures.LabelEqualDestinations(src)
+
+	dst = measures.NotProcessedPoints()
+	if len(dst) == 0 {
 		return measures, nil
 	}
 
-	newMeasures, err := b.fetchDataFromExternalRoutingData(ctx, src, notCachedDst)
+	cachedMeasures, err := b.cache.GetDestinationMeasures(ctx, src, dst)
+	if err != nil {
+		// TODO: needs to check if it is an optimal way to return in this point, or it makes sense to fetch data from external source
+		return measures, err
+	}
+
+	measures.UpdateMeasures(cachedMeasures)
+
+	dst = measures.NotProcessedPoints()
+	if len(dst) == 0 {
+		return measures, nil
+	}
+
+	newMeasures, err := b.externalRoutingData.GetDestinationMeasures(ctx, src, dst)
 	if err != nil {
 		return measures, err
 	}
 
 	err = b.cache.StoreDestinationMeasures(ctx, src, newMeasures)
 	if err != nil {
-		return measures, err
+		log.Println("failed to store new measures into cache:", err)
 	}
 
-	for _, newData := range newMeasures {
-		if newData.Destination.Index >= 0 && newData.Destination.Index < len(measures) {
-			measures[newData.Destination.Index] = newData
-		}
-	}
+	measures.UpdateMeasures(newMeasures)
 
 	return measures, nil
-}
-
-func (b *Bridge) fetchDataFromCache(ctx context.Context, src pkg.Point, dst []pkg.Point) ([]pkg.DestinationMeasure, []pkg.Point, error) {
-	measures := pkg.NewDestinationMeasureList(len(dst))
-	cachedData, err := b.cache.GetDestinationMeasures(ctx, src, dst)
-	if err != nil {
-		return nil, nil, err
-	}
-	if len(cachedData) != len(measures) {
-		return nil, nil, fmt.Errorf("unexpected data from cache, len of result not equal number of destination points")
-	}
-
-	var notCachedDst []pkg.Point
-
-	for i, data := range cachedData {
-		if data.Err != nil {
-			dst[i].Index = i
-			notCachedDst = append(notCachedDst, dst[i])
-			continue
-		}
-
-		measures[i] = data
-	}
-
-	return measures, notCachedDst, nil
-}
-
-func (b *Bridge) fetchDataFromExternalRoutingData(ctx context.Context, src pkg.Point, dst []pkg.Point) ([]pkg.DestinationMeasure, error) {
-	return b.externalRoutingData.GetDestinationMeasure(ctx, src, dst)
 }

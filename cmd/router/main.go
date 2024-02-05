@@ -25,7 +25,7 @@ func main() {
 	}
 
 	dataCache := cache.NewInMemory()
-	osmrData := external_routing_data.NewOSMR(cfg.OSRM)
+	osmrData := external_routing_data.NewOSMR(cfg.OSRMConfig)
 	routingData := bridge.NewBridge(dataCache, osmrData)
 	restAPI := rest_api.NewRestAPIServer(cfg.HttpConfig, routingData)
 
